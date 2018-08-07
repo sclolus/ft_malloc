@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/07 16:22:23 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/07 16:25:15 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,5 +14,6 @@
 
 t_arena_header	*allocate_arena(enum e_arena_type type)
 {
+
 	return (NULL);
 }
