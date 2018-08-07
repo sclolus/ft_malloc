@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/07 16:23:14 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/07 18:15:32 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ typedef enum	e_arena_type
 	TINY_A = 0,
 	SMALL_A,
 	LARGE_A,
-	SUPPORTED_ARENA_TYPE,
+	SUPPORTED_ARENA_TYPES,
 }				t_arena_type;
 
 typedef struct	s_allocation_list t_allocation_list;
@@ -76,13 +76,16 @@ typedef struct	s_arena_header // too large, please fix this
 	uint8_t					pad[4];
 }				t_arena_header;
 
-t_arena_header	*allocate_arena(enum e_arena_type type);
+typedef struct	s_arena_list	t_arena_list;
+
+
+t_arena_type	get_arena_type_by_size(size_t size);
+t_arena			*allocate_arena(enum e_arena_type type);
 t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type);
 
 
 #define ARENA_LIST_SIZE_MULTIPLE 1
 
-typedef struct	s_arena_list	t_arena_list;
 typedef struct	s_arena_list
 {
 	t_arena_list		*prev;
@@ -102,19 +105,29 @@ t_arena_list	*init_list(t_arena_list *list, uint64_t allocated_size);
 
 t_arena_header	*find_first_unused_arena_header(t_arena_list *list);
 
+typedef struct	s_arena_type_info
+{
+	uint64_t		nbr_pages;
+	uint64_t		allocation_size;
+	t_arena_type	type;
+	uint8_t			pad[4];
+
+	// allocator function
+}				t_arena_type_info;
+
 typedef struct	s_malloc_info
 {
-	t_arena_list	*arena_lists[SUPPORTED_ARENA_TYPE];
+	t_arena_list		*arena_lists[SUPPORTED_ARENA_TYPES];
 	// arena sizes in number of memory pages
-	uint64_t		arena_sizes[SUPPORTED_ARENA_TYPE];
-	uint64_t		page_size;
-	uint8_t			initialized;
-	uint8_t			pad[7];
+	t_arena_type_info	arena_type_infos[SUPPORTED_ARENA_TYPES];
+	uint64_t			page_size;
+	uint8_t				initialized;
+	uint8_t				pad[7];
 }				t_malloc_info;
 
 extern t_malloc_info	g_malloc_info;
 
 
-void	init_malloc_info(void);
+int32_t	init_malloc_info(void);
 
 #endif

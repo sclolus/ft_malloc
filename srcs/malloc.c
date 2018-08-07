@@ -6,14 +6,14 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/07 16:17:22 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/07 18:14:16 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
 t_malloc_info	g_malloc_info = {
-	{NULL}, {0}, DEFAULT_PAGE_SIZE, 0, {0}
+	{NULL}, {{0, TINY_ALLOCATION_SIZE, TINY_A, {0}}, {0, SMALL_ALLOCATION_SIZE, SMALL_A, {0}}, {0, SMALL_ALLOCATION_SIZE + 1, LARGE_A, {0}}}, DEFAULT_PAGE_SIZE, 0, {0}
 };
 
 void free(void *ptr) {
@@ -48,9 +48,14 @@ static void	test_malloc(void)
 
 void *malloc(size_t size)
 {
+	t_arena_type	arena_type;
+
 	(void)size;
 	init_malloc_info();
 	test_malloc();
+	if (-1 == init_malloc_info())
+		return (NULL);
+	arena_type = get_arena_type_by_size(size);
 
 	return (NULL);
 }

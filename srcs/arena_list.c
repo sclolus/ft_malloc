@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:16:10 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/07 16:23:10 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/07 18:15:12 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,9 @@ t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type)
 
 	if (!(hdr = find_first_unused_arena_header(list)))
 	{
-		assert(0);
+		if (!(list = add_arena_list(list)))
+			return (NULL);
+		assert(hdr = find_first_unused_arena_header(list));
 	}
 	corresponding_node = retrieve_arena_list(hdr);
 	corresponding_node->last_trashed_arena_header = NULL;
@@ -123,7 +125,7 @@ t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type)
 	ft_bzero(hdr, sizeof(t_arena_header));
 	hdr->addr = arena;
 	hdr->state = USED;
-	hdr->nbr_pages = g_malloc_info.arena_sizes[type];
+	hdr->nbr_pages = g_malloc_info.arena_type_infos[type].nbr_pages; // what if this motherfucker is large ?
 	hdr->alloc_number = 0;
 	assert(corresponding_node->nbr_arenas <= corresponding_node->capacity);
 	return (hdr);
