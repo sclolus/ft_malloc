@@ -14,7 +14,7 @@ SRC= srcs/malloc.c \
 HDRS= includes/ft_malloc.h
 OBJ= $(SRC:.c=.o)
 CC= gcc
-CC_FLAGS= -v -Wall -Werror -Wextra -Weverything  -O0 -g3 -fsanitize=address -fsanitize-blacklist=my_ignores.txt
+CC_FLAGS= -v -Wall -Werror -Wextra -Weverything  -O0 -g3 #-fsanitize=address -fsanitize-blacklist=my_ignores.txt
 TARGET_CC_FLAGS= -dynamic -shared  -fpic
 LIBFT_PATH=./libft/
 FLAGS= -I./libft/includes -I./includes
@@ -39,5 +39,11 @@ fclean: clean
 re: fclean all
 
 $(TEST_NAME): all
-	$(CC) $(CC_FLAGS) $(FLAGS) $(TEST_SRCS) -L./libft -lft $* -o  $(TEST_NAME)
-	DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES=$(TARGET) ./$(TEST_NAME)
+	$(CC) $(CC_FLAGS) $(FLAGS) $(TEST_SRCS) $(TARGET) -L./libft -lft $* -o  $(TEST_NAME)
+	DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES=$(TARGET) ./$(TEST_NAME) || echo "Failure"
+$(TEST_NAME)_time: all
+	$(CC) $(CC_FLAGS) $(FLAGS) $(TEST_SRCS) $(TARGET) -L./libft -lft $* -o  $(TEST_NAME)
+	DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES=$(TARGET) \time -l ./$(TEST_NAME) || echo "Failure"
+true_malloc:
+	$(CC) $(CC_FLAGS) $(FLAGS) test_true_malloc.c -L./libft -lft -o test_true_malloc
+	\time -l ./test_true_malloc || echo "Failure"

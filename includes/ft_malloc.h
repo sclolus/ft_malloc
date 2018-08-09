@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/07 18:15:32 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/09 21:51:46 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,13 @@
 # include "libft.h"
 # include <unistd.h>
 # include <sys/mman.h>
+# include <limits.h>
+
 # include <assert.h>
 
 # include <stdio.h>//
+
+//# define SIZE_T_MAX
 
 /*
 ** Required functions
@@ -27,6 +31,7 @@
 extern void free(void *ptr);
 extern void *malloc(size_t size);
 extern void *realloc(void *ptr, size_t size);
+extern void	*calloc(size_t count, size_t size);
 
 # define ALLOCATIONS_PER_ARENA 128
 # define DEFAULT_PAGE_SIZE 4096
@@ -34,6 +39,9 @@ extern void *realloc(void *ptr, size_t size);
 # define TINY_ARENA_SIZE TINY_ALLOCATION_SIZE * ALLOCATIONS_PER_ARENA
 # define SMALL_ALLOCATION_SIZE DEFAULT_PAGE_SIZE
 # define SMALL_ARENA_SIZE SMALL_ALLOCATION_SIZE * ALLOCATIONS_PER_ARENA
+
+
+# define HEX_BASE "0123456789abcdef"
 
 typedef enum	e_arena_type
 {
@@ -50,8 +58,8 @@ typedef void		t_arena;
 
 typedef struct	s_alloc_header
 {
-	uint64_t	size;
-	uint64_t	md5_sum; // if I ever add this
+	uint16_t	size;
+//	uint64_t	md5_sum; // if I ever add this
 }				t_alloc_header;
 
 typedef enum	e_arena_state
@@ -65,13 +73,13 @@ typedef struct	s_arena_header // too large, please fix this
 	/// the starting address of the arena
 	void					*addr;
 	uint64_t				nbr_pages;
-	t_arena_type			t_arena_type;
+	t_arena_type			arena_type;
 	t_arena_state			state;
 	/// the number of pages in the arena
 	/// there should be exactly o;ne alloc_bitmap per page allocated
 	t_alloc_bitmap			arena_alloc_bitmap[2];
 
-	t_alloc_header			alloc_headers[128];
+//	t_alloc_header			alloc_headers[128];
 	uint32_t				alloc_number;
 	uint8_t					pad[4];
 }				t_arena_header;
@@ -80,8 +88,14 @@ typedef struct	s_arena_list	t_arena_list;
 
 
 t_arena_type	get_arena_type_by_size(size_t size);
-t_arena			*allocate_arena(enum e_arena_type type);
-t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type);
+t_arena			*allocate_arena(uint64_t nbr_pages);
+t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type, uint64_t size);
+void			*allocate_memory_on_arena(t_arena_header *hdr, uint64_t size);
+t_arena_header	*find_first_available_arena(t_arena_list *list);
+int32_t			is_addr_allocated_in_arena(void *addr, t_arena_header *hdr);
+
+void			*malloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type); // remove type ?;
+void			*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, void *ptr);
 
 
 #define ARENA_LIST_SIZE_MULTIPLE 1
@@ -103,16 +117,23 @@ t_arena_list	*allocate_arena_list(void);
 int				deallocate_arena_list(t_arena_list *list);
 t_arena_list	*init_list(t_arena_list *list, uint64_t allocated_size);
 
-t_arena_header	*find_first_unused_arena_header(t_arena_list *list);
+t_arena_header	*find_first_unused_arena_header(t_arena_list *node);
+t_arena_list	*find_first_available_arena_list(t_arena_list *list);
+t_arena_header	*find_addr_in_arenas(void *addr);
+t_arena_header	*find_addr_in_arena_list(void *addr, t_arena_list *list);
+t_arena_header	*find_addr_in_hdr_list(void *addr, t_arena_list *list);
 
+
+
+typedef void	*(*t_memory_allocator)(uint64_t, t_arena_list *, t_arena_type);
 typedef struct	s_arena_type_info
 {
-	uint64_t		nbr_pages;
-	uint64_t		allocation_size;
-	t_arena_type	type;
-	uint8_t			pad[4];
-
-	// allocator function
+	uint64_t			allocation_per_arena;
+	uint64_t			nbr_pages;
+	uint64_t			allocation_size;
+	t_memory_allocator	memory_allocator;
+	t_arena_type		type;
+	uint8_t				pad[4];
 }				t_arena_type_info;
 
 typedef struct	s_malloc_info
@@ -129,5 +150,11 @@ extern t_malloc_info	g_malloc_info;
 
 
 int32_t	init_malloc_info(void);
+
+// DEBUG FUNCTIONS
+
+void		print_arena_type(t_arena_type type);
+uint32_t	*main_was_called(void);
+# define PRINT(fd, x) write(fd, x, strlen(x));
 
 #endif
