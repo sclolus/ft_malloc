@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/09 21:57:15 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/09 23:01:59 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,8 @@ void		*allocate_memory_on_arena(t_arena_header *hdr, uint64_t size)
 	void	*addr = (uint8_t*)hdr->addr + i * g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	assert((uint64_t)addr % 8 == 0);
 	assert((uint64_t)addr % 64 == 0);
+	PRINT(1, "\nallocated addr: ");
+	PRINT(1, ft_static_ulltoa_base((uint64_t)addr, HEX_BASE));
 	return (addr);
 }
 
@@ -152,4 +154,16 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 
 	// DONT FORGET TO FREE THE OLD PTR
 	return (new_addr);
+}
+
+void	free_memory_on_arena(void *addr, t_arena_header *hdr)
+{
+	uint64_t	allocation_size;
+	uint64_t	alloc_index;
+
+	assert(is_addr_allocated_in_arena(addr, hdr));
+	hdr->alloc_number--;
+	allocation_size = g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
+	alloc_index = (uint64_t)((uint8_t*)addr - (uint8_t*)hdr->addr) / allocation_size;
+	hdr->arena_alloc_bitmap[alloc_index / (sizeof(t_alloc_bitmap) * 8UL)] &= ~(0x1UL << (63UL - alloc_index % (sizeof(t_alloc_bitmap) * 8UL)));
 }

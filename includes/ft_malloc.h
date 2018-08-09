@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/09 21:51:46 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/09 23:04:51 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ extern void free(void *ptr);
 extern void *malloc(size_t size);
 extern void *realloc(void *ptr, size_t size);
 extern void	*calloc(size_t count, size_t size);
+extern void	*valloc(size_t size);
 
 # define ALLOCATIONS_PER_ARENA 128
 # define DEFAULT_PAGE_SIZE 4096
@@ -96,6 +97,7 @@ int32_t			is_addr_allocated_in_arena(void *addr, t_arena_header *hdr);
 
 void			*malloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type); // remove type ?;
 void			*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, void *ptr);
+void			free_memory_on_arena(void *addr, t_arena_header *hdr);
 
 
 #define ARENA_LIST_SIZE_MULTIPLE 1
@@ -108,7 +110,6 @@ typedef struct	s_arena_list
 	uint64_t			capacity;
 	t_arena_header		*last_trashed_arena_header;
 	t_arena_list		*next;
-
 }				t_arena_list;
 
 t_arena_list	*remove_arena_list(t_arena_list *list);

@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/09 21:58:21 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/09 23:05:04 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,20 @@ t_malloc_info	g_malloc_info = {
 };
 
 void free(void *ptr) {
-	/* PRINT(1, "Attempting to free: "); */
-	/* PRINT(1, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE)); */
-	/* PRINT(1, "\n"); */
-	(void)ptr;
+	t_arena_header *hdr;
+	PRINT(1, "Attempting to free: ");
+	PRINT(1, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
+	PRINT(1, "\n");
+
+	if (-1 == init_malloc_info() || ptr == NULL)
+		return ;
+	if ((hdr = find_addr_in_arenas(ptr)) == NULL)
+	{
+		PRINT(2, "pointer being free'd was not allocated: ");
+		PRINT(2, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
+		PRINT(2, "\n");
+	}
+
 }
 
 static void	test_basic_arena_list_functions(void)
@@ -103,4 +113,13 @@ void	*calloc(size_t count, size_t size)
 	ptr = malloc(count * size);
 	ft_bzero(ptr, count * size);
 	return (ptr);
+}
+
+void	*valloc(size_t size)
+{
+	(void)size;
+	PRINT(1, "valloc() was called ");
+	if (size)
+		exit(EXIT_FAILURE);
+	return (NULL);
 }
