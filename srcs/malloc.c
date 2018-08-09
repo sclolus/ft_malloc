@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/09 23:05:04 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 01:11:40 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,13 @@ t_malloc_info	g_malloc_info = {
 
 void free(void *ptr) {
 	t_arena_header *hdr;
-	PRINT(1, "Attempting to free: ");
+	PRINT(1, "\nAttempting to free: ");
 	PRINT(1, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
 	PRINT(1, "\n");
 
 	if (-1 == init_malloc_info() || ptr == NULL)
 		return ;
-	if ((hdr = find_addr_in_arenas(ptr)) == NULL)
+	if ((hdr = find_addr_in_arenas(ptr)) == NULL && g_main_was_called)
 	{
 		PRINT(2, "pointer being free'd was not allocated: ");
 		PRINT(2, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
@@ -70,11 +70,11 @@ static void	test_malloc(void)
 
 typedef void *(*malloc_func_t)(size_t);
 
-uint32_t	*main_was_called(void)
-{
-	static	uint32_t	main_was_called = 0;
+uint32_t	g_main_was_called = 0;
 
-	return (&main_was_called);
+__attribute__((constructor(99999))) void main_was_called(void)
+{
+	g_main_was_called = 1;
 }
 
 void *malloc(size_t size)
@@ -93,6 +93,20 @@ void *malloc(size_t size)
 }
 
 void *realloc(void *ptr, size_t size)
+{
+	void			*new_zone;
+	t_arena_type	arena_type;
+
+//	PRINT(1, "realloc() was called\n");
+	if (-1 == init_malloc_info())
+		return (NULL);
+	arena_type = get_arena_type_by_size(size);
+	new_zone = realloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type, ptr);
+	return (new_zone);
+}
+
+
+void *reallocf(void *ptr, size_t size) // not completed
 {
 	void			*new_zone;
 	t_arena_type	arena_type;

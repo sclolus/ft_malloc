@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/09 23:04:51 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 01:11:45 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 extern void free(void *ptr);
 extern void *malloc(size_t size);
 extern void *realloc(void *ptr, size_t size);
+extern void *reallocf(void *ptr, size_t size);
 extern void	*calloc(size_t count, size_t size);
 extern void	*valloc(size_t size);
 
@@ -148,6 +149,8 @@ typedef struct	s_malloc_info
 }				t_malloc_info;
 
 extern t_malloc_info	g_malloc_info;
+extern uint32_t			g_main_was_called; //remove this
+__attribute__((constructor(99999))) void main_was_called(void);
 
 
 int32_t	init_malloc_info(void);
@@ -155,7 +158,6 @@ int32_t	init_malloc_info(void);
 // DEBUG FUNCTIONS
 
 void		print_arena_type(t_arena_type type);
-uint32_t	*main_was_called(void);
 # define PRINT(fd, x) write(fd, x, strlen(x));
 
 #endif
