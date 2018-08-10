@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 06:12:43 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 07:32:38 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <unistd.h>
 # include <sys/mman.h>
 # include <limits.h>
-
+# include <fcntl.h>
 # include <assert.h>
 
 # include <stdio.h>//
@@ -147,21 +147,21 @@ typedef struct	s_malloc_info
 	// arena sizes in number of memory pages
 	t_arena_type_info	arena_type_infos[SUPPORTED_ARENA_TYPES];
 	uint64_t			page_size;
+	int					fd_output;
 	uint8_t				initialized;
-	uint8_t				pad[7];
+	uint8_t				pad[3];
 }				t_malloc_info;
 
 extern t_malloc_info	g_malloc_info;
 extern uint32_t			g_main_was_called; //remove this
-
+extern pthread_mutex_t	g_malloc_mutex;
 
 __attribute__((constructor(99999))) void main_was_called(void);
 
-
 int32_t	init_malloc_info(void);
 
-# define MALLOC_UNLOCK_MUTEX __attribute__((cleanup(cleanup_unlock_mutex)))
-void	cleanup_unlock_mutex(void **__attribute__((unused))no);
+void		malloc_lock_mutex(void);
+void		malloc_unlock_mutex(void);
 
 // DEBUG FUNCTIONS
 

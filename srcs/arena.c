@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 05:34:22 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 07:51:59 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,8 +83,10 @@ void		*allocate_memory_on_arena(t_arena_header *hdr, uint64_t size)
 	void	*addr = (uint8_t*)hdr->addr + i * g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	assert((uint64_t)addr % 8 == 0);
 	assert((uint64_t)addr % 64 == 0);
-	PRINT(1, "\nallocated addr: ");
-	PRINT(1, ft_static_ulltoa_base((uint64_t)addr, HEX_BASE));
+	/* PRINT(g_malloc_info.fd_output, "\nallocated addr: "); */
+	/* PRINT(g_malloc_info.fd_output, ft_static_ulltoa_base((uint64_t)addr, HEX_BASE)); */
+	/* PRINT(g_malloc_info.fd_output, ", of size: "); */
+	/* PRINT(g_malloc_info.fd_output, ft_static_ulltoa((uint64_t)size)); */
 	return (addr);
 }
 
@@ -143,7 +145,7 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 		return (malloc_on_arenas(size, g_malloc_info.arena_lists[type], type));
 	list = find_addr_in_arenas(ptr);
 	hdr = find_addr_in_hdr_list(ptr, list);
-	if (hdr == NULL)
+	if (hdr == NULL || list == NULL)
 	{
 		PRINT(2, "pointer being realloc'd was not allocated: ");
 		PRINT(2, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
@@ -156,7 +158,7 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 	copied_size = size < g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size ? size : g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	if (new_addr)
 		ft_memcpy(new_addr, ptr, copied_size);
-	free_memory_zone(hdr, list);
+	free_memory_zone(ptr, list);
 	// DONT FORGET TO FREE THE OLD PTR
 	return (new_addr);
 }

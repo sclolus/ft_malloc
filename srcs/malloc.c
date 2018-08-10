@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 06:16:44 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 08:21:23 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,19 @@ t_malloc_info	g_malloc_info = {
 	{NULL}, {{ALLOCATIONS_PER_ARENA, 0, TINY_ALLOCATION_SIZE, malloc_on_arenas, TINY_A, {0}}
 			 , {ALLOCATIONS_PER_ARENA, 0, SMALL_ALLOCATION_SIZE, malloc_on_arenas, SMALL_A, {0}}
 			 , {1, 0, SMALL_ALLOCATION_SIZE + 1, malloc_on_arenas, LARGE_A, {0}}}
-	, DEFAULT_PAGE_SIZE, 0, {0}
+	, DEFAULT_PAGE_SIZE, STDOUT_FILENO, 0, {0}
 };
 
-MALLOC_UNLOCK_MUTEX void free(void *ptr) {
+void free(void *ptr) {
 	t_arena_list *node;
 
-	PRINT(1, "\nAttempting to free: ");
-	PRINT(1, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
-	PRINT(1, "\n");
+	PRINT(g_malloc_info.fd_output, "\nAttempting to free: ");
+	PRINT(g_malloc_info.fd_output, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
+	PRINT(g_malloc_info.fd_output, "\n");
 
 	if (-1 == init_malloc_info() || ptr == NULL)
 		return ;
+	malloc_lock_mutex();
 	if ((node = find_addr_in_arenas(ptr)) == NULL)
 	{
 		if (g_main_was_called) {
@@ -37,14 +38,17 @@ MALLOC_UNLOCK_MUTEX void free(void *ptr) {
 			PRINT(2, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
 			PRINT(2, "\n");
 		}
+		malloc_unlock_mutex();
 		return ;
 	}
 	free_memory_zone(ptr, node);
+	malloc_unlock_mutex();
 }
 
 static void	test_basic_arena_list_functions(void)
 {
-	uint32_t	i = 0;
+	uint32_t		i = 0;
+
 	while (i < 128) {
 		assert(add_arena_list(g_malloc_info.arena_lists[1]));
 		i++;
@@ -81,34 +85,43 @@ __attribute__((constructor(99999))) void main_was_called(void)
 	g_main_was_called = 1;
 }
 
-MALLOC_UNLOCK_MUTEX void *malloc(size_t size)
+void *malloc(size_t size)
 {
 	t_arena_type	arena_type;
+	void			*ptr;
 	(void)size;
 	(void)test_malloc;
+	PRINT(1, "malloc() was called\n");
 	if (-1 == init_malloc_info())
 		return (NULL);
 	(void)arena_type;
+	malloc_lock_mutex();
 	arena_type = get_arena_type_by_size(size);
-	void	*ptr = malloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type);
+	ptr = malloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type);
+	malloc_unlock_mutex();
+	PRINT(1, "size : ");
+	PRINT(1, ft_static_ulltoa(size));
+	PRINT(1, "malloc() was exited\n");
 	return (ptr); // add errno
 }
 
-MALLOC_UNLOCK_MUTEX void *realloc(void *ptr, size_t size)
+void *realloc(void *ptr, size_t size)
 {
 	void			*new_zone;
 	t_arena_type	arena_type;
 
-//	PRINT(1, "realloc() was called\n");
+	PRINT(1, "realloc() was called\n");
 	if (-1 == init_malloc_info())
 		return (NULL);
+	malloc_lock_mutex();
 	arena_type = get_arena_type_by_size(size);
 	new_zone = realloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type, ptr);
+	malloc_unlock_mutex();
 	return (new_zone);
 }
 
 
-MALLOC_UNLOCK_MUTEX void *reallocf(void *ptr, size_t size) // not completed
+void *reallocf(void *ptr, size_t size) // not completed
 {
 	void			*new_zone;
 	t_arena_type	arena_type;
@@ -116,25 +129,29 @@ MALLOC_UNLOCK_MUTEX void *reallocf(void *ptr, size_t size) // not completed
 	PRINT(1, "reallocf() was called\n");
 	if (-1 == init_malloc_info())
 		return (NULL);
+	malloc_lock_mutex();
 	arena_type = get_arena_type_by_size(size);
 	if (!(new_zone = realloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type, ptr)))
 		free(ptr);
+	malloc_unlock_mutex();
 	return (new_zone);
 }
 
-MALLOC_UNLOCK_MUTEX void	*calloc(size_t count, size_t size)
+void	*calloc(size_t count, size_t size)
 {
 	void	*ptr;
 
 	if (-1 == init_malloc_info())
 		return (NULL);
-//	PRINT(1, "calloc() was called\n");
+	PRINT(1, "calloc() was called\n");
+	malloc_lock_mutex();
 	ptr = malloc(count * size);
 	ft_bzero(ptr, count * size);
+	malloc_unlock_mutex();
 	return (ptr);
 }
 
-MALLOC_UNLOCK_MUTEX void	*valloc(size_t size)
+void	*valloc(size_t size)
 {
 	(void)size;
 	PRINT(1, "valloc() was called ");

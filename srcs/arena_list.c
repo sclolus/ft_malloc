@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:16:10 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 04:13:53 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 07:16:40 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,9 @@ t_arena_list	*init_list(t_arena_list *list, uint64_t allocated_size)
 	list->nbr_arenas = 0; //safe to remove for now.
 	list->next = NULL;
 	list->capacity = (allocated_size - sizeof(t_arena_list)) / sizeof(t_arena_header);
-	PRINT(1, "\nlist->capacity: ");
-	PRINT(1, ft_static_ulltoa(list->capacity));
-	PRINT(1, "\n");
+	/* PRINT(1, "\nlist->capacity: "); */
+	/* PRINT(1, ft_static_ulltoa(list->capacity)); */
+	/* PRINT(1, "\n"); */
 	return (list);
 }
 
