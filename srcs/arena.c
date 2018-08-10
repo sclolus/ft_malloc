@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/09 23:01:59 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 05:34:22 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,11 @@ t_arena			*allocate_arena(uint64_t nbr_pages)
 					, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0)))
 		return (NULL);
 	return (new);
+}
+
+int32_t		deallocate_arena(t_arena *arena, uint64_t size)
+{
+	return (munmap(arena, size));
 }
 
 void		*allocate_memory_on_arena(t_arena_header *hdr, uint64_t size)
@@ -136,8 +141,8 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 
 	if (ptr == NULL)
 		return (malloc_on_arenas(size, g_malloc_info.arena_lists[type], type));
-	hdr = find_addr_in_arenas(ptr);
-	(void)list;
+	list = find_addr_in_arenas(ptr);
+	hdr = find_addr_in_hdr_list(ptr, list);
 	if (hdr == NULL)
 	{
 		PRINT(2, "pointer being realloc'd was not allocated: ");
@@ -151,19 +156,39 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 	copied_size = size < g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size ? size : g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	if (new_addr)
 		ft_memcpy(new_addr, ptr, copied_size);
-
+	free_memory_zone(hdr, list);
 	// DONT FORGET TO FREE THE OLD PTR
 	return (new_addr);
 }
 
-void	free_memory_on_arena(void *addr, t_arena_header *hdr)
+t_arena_list *trash_arena(t_arena_header *hdr, t_arena_list *node)
 {
-	uint64_t	allocation_size;
-	uint64_t	alloc_index;
+	assert(hdr && node);
 
-	assert(is_addr_allocated_in_arena(addr, hdr));
+	hdr->state = TRASHED;
+	node->last_trashed_arena_header = hdr;
+	assert(deallocate_arena(hdr->addr, hdr->nbr_pages * g_malloc_info.page_size) == 0);
+	ft_bzero(hdr, sizeof(*hdr)); // not sure I should leave it
+	node->nbr_arenas--;
+	if (node->nbr_arenas == 0UL)
+		return (remove_arena_list(node));
+	return (node);
+}
+
+void	free_memory_zone(void *addr, t_arena_list *node)
+{
+	uint64_t		allocation_size;
+	uint64_t		alloc_index;
+	t_arena_header	*hdr;
+
+	if (addr == NULL)
+		return ;
+	hdr = find_addr_in_hdr_list(addr, node);
+	assert(hdr);
 	hdr->alloc_number--;
 	allocation_size = g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	alloc_index = (uint64_t)((uint8_t*)addr - (uint8_t*)hdr->addr) / allocation_size;
 	hdr->arena_alloc_bitmap[alloc_index / (sizeof(t_alloc_bitmap) * 8UL)] &= ~(0x1UL << (63UL - alloc_index % (sizeof(t_alloc_bitmap) * 8UL)));
+	if (hdr->alloc_number == 0)
+		trash_arena(hdr, node);
 }

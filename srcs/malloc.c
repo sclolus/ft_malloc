@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 01:11:40 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 06:16:44 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,21 +21,25 @@ t_malloc_info	g_malloc_info = {
 	, DEFAULT_PAGE_SIZE, 0, {0}
 };
 
-void free(void *ptr) {
-	t_arena_header *hdr;
+MALLOC_UNLOCK_MUTEX void free(void *ptr) {
+	t_arena_list *node;
+
 	PRINT(1, "\nAttempting to free: ");
 	PRINT(1, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
 	PRINT(1, "\n");
 
 	if (-1 == init_malloc_info() || ptr == NULL)
 		return ;
-	if ((hdr = find_addr_in_arenas(ptr)) == NULL && g_main_was_called)
+	if ((node = find_addr_in_arenas(ptr)) == NULL)
 	{
-		PRINT(2, "pointer being free'd was not allocated: ");
-		PRINT(2, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
-		PRINT(2, "\n");
+		if (g_main_was_called) {
+			PRINT(2, "pointer being free'd was not allocated: ");
+			PRINT(2, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
+			PRINT(2, "\n");
+		}
+		return ;
 	}
-
+	free_memory_zone(ptr, node);
 }
 
 static void	test_basic_arena_list_functions(void)
@@ -77,7 +81,7 @@ __attribute__((constructor(99999))) void main_was_called(void)
 	g_main_was_called = 1;
 }
 
-void *malloc(size_t size)
+MALLOC_UNLOCK_MUTEX void *malloc(size_t size)
 {
 	t_arena_type	arena_type;
 	(void)size;
@@ -88,11 +92,9 @@ void *malloc(size_t size)
 	arena_type = get_arena_type_by_size(size);
 	void	*ptr = malloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type);
 	return (ptr); // add errno
-
-	return (NULL);
 }
 
-void *realloc(void *ptr, size_t size)
+MALLOC_UNLOCK_MUTEX void *realloc(void *ptr, size_t size)
 {
 	void			*new_zone;
 	t_arena_type	arena_type;
@@ -106,33 +108,37 @@ void *realloc(void *ptr, size_t size)
 }
 
 
-void *reallocf(void *ptr, size_t size) // not completed
+MALLOC_UNLOCK_MUTEX void *reallocf(void *ptr, size_t size) // not completed
 {
 	void			*new_zone;
 	t_arena_type	arena_type;
 
-//	PRINT(1, "realloc() was called\n");
+	PRINT(1, "reallocf() was called\n");
 	if (-1 == init_malloc_info())
 		return (NULL);
 	arena_type = get_arena_type_by_size(size);
-	new_zone = realloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type, ptr);
+	if (!(new_zone = realloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type, ptr)))
+		free(ptr);
 	return (new_zone);
 }
 
-void	*calloc(size_t count, size_t size)
+MALLOC_UNLOCK_MUTEX void	*calloc(size_t count, size_t size)
 {
 	void	*ptr;
 
+	if (-1 == init_malloc_info())
+		return (NULL);
 //	PRINT(1, "calloc() was called\n");
 	ptr = malloc(count * size);
 	ft_bzero(ptr, count * size);
 	return (ptr);
 }
 
-void	*valloc(size_t size)
+MALLOC_UNLOCK_MUTEX void	*valloc(size_t size)
 {
 	(void)size;
 	PRINT(1, "valloc() was called ");
+	assert(0);
 	if (size)
 		exit(EXIT_FAILURE);
 	return (NULL);

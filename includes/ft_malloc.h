@@ -6,13 +6,14 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 01:11:45 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 06:12:43 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_MALLOC_H
 # define FT_MALLOC_H
 
+# include <pthread.h>
 # include "libft.h"
 # include <unistd.h>
 # include <sys/mman.h>
@@ -91,14 +92,16 @@ typedef struct	s_arena_list	t_arena_list;
 
 t_arena_type	get_arena_type_by_size(size_t size);
 t_arena			*allocate_arena(uint64_t nbr_pages);
+int32_t			deallocate_arena(t_arena *arena, uint64_t len);
 t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type, uint64_t size);
 void			*allocate_memory_on_arena(t_arena_header *hdr, uint64_t size);
 t_arena_header	*find_first_available_arena(t_arena_list *list);
 int32_t			is_addr_allocated_in_arena(void *addr, t_arena_header *hdr);
+t_arena_list	*trash_arena(t_arena_header *hdr, t_arena_list *node);
 
 void			*malloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type); // remove type ?;
 void			*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, void *ptr);
-void			free_memory_on_arena(void *addr, t_arena_header *hdr);
+void			free_memory_zone(void *addr, t_arena_list *node);
 
 
 #define ARENA_LIST_SIZE_MULTIPLE 1
@@ -121,8 +124,8 @@ t_arena_list	*init_list(t_arena_list *list, uint64_t allocated_size);
 
 t_arena_header	*find_first_unused_arena_header(t_arena_list *node);
 t_arena_list	*find_first_available_arena_list(t_arena_list *list);
-t_arena_header	*find_addr_in_arenas(void *addr);
-t_arena_header	*find_addr_in_arena_list(void *addr, t_arena_list *list);
+t_arena_list	*find_addr_in_arenas(void *addr);
+t_arena_list	*find_addr_in_arena_list(void *addr, t_arena_list *list);
 t_arena_header	*find_addr_in_hdr_list(void *addr, t_arena_list *list);
 
 
@@ -150,10 +153,15 @@ typedef struct	s_malloc_info
 
 extern t_malloc_info	g_malloc_info;
 extern uint32_t			g_main_was_called; //remove this
+
+
 __attribute__((constructor(99999))) void main_was_called(void);
 
 
 int32_t	init_malloc_info(void);
+
+# define MALLOC_UNLOCK_MUTEX __attribute__((cleanup(cleanup_unlock_mutex)))
+void	cleanup_unlock_mutex(void **__attribute__((unused))no);
 
 // DEBUG FUNCTIONS
 

@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:16:10 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/09 21:52:18 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/10 04:13:53 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,8 @@ t_arena_list	*remove_arena_list(t_arena_list *list)
 	t_arena_list	*next;
 	t_arena_list	*prev;
 
-	assert(list->prev);
+	if (list->prev == NULL)
+		return (list);
 	assert(list->nbr_arenas == 0);
 	next = list->next;
 	prev = list->prev;
@@ -117,30 +118,28 @@ t_arena_header		*find_addr_in_hdr_list(void *addr, t_arena_list *list)
 	return (NULL);
 }
 
-t_arena_header		*find_addr_in_arena_list(void *addr, t_arena_list *list)
+t_arena_list		*find_addr_in_arena_list(void *addr, t_arena_list *list)
 {
-	t_arena_header	*hdr;
-
 	assert(list);
 	while (list)
 	{
-		if ((hdr = find_addr_in_hdr_list(addr, list)))
-			return (hdr);
+		if ((find_addr_in_hdr_list(addr, list)))
+			return (list);
 		list = list->next;
 	}
 	return (NULL);
 }
 ///this function retrievies the arena_header from which the addr belongs to.
-t_arena_header		*find_addr_in_arenas(void *addr)
+t_arena_list		*find_addr_in_arenas(void *addr)
 {
-	t_arena_header *hdr;
+	t_arena_list *list;
 
-	if ((hdr = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[TINY_A])))
-		return (hdr);
-	if ((hdr = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[SMALL_A])))
-		return (hdr);
-	if ((hdr = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[LARGE_A])))
-		return (hdr);
+	if ((list = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[TINY_A])))
+		return (list);
+	if ((list = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[SMALL_A])))
+		return (list);
+	if ((list = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[LARGE_A])))
+		return (list);
 	return (NULL);
 }
 
@@ -172,7 +171,7 @@ t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type, uint64_t si
 	ft_bzero(hdr, sizeof(t_arena_header));
 	hdr->addr = arena;
 	hdr->state = USED;
-	hdr->nbr_pages = nbr_allocated_pages; // what if this motherfucker is large ?
+	hdr->nbr_pages = nbr_allocated_pages;
 	hdr->alloc_number = 0UL;
 	hdr->arena_alloc_bitmap[0] = 0UL;
 	hdr->arena_alloc_bitmap[1] = 0UL;

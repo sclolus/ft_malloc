@@ -44,6 +44,6 @@ $(TEST_NAME): all
 $(TEST_NAME)_time: all
 	$(CC) $(CC_FLAGS) $(FLAGS) $(TEST_SRCS) $(TARGET) -L./libft -lft $* -o  $(TEST_NAME)
 	DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES=$(TARGET) \time -l ./$(TEST_NAME) || echo "Failure"
-true_malloc:
-	$(CC) $(CC_FLAGS) $(FLAGS) test_true_malloc.c -L./libft -lft -o test_true_malloc
+true_malloc: $(TEST_NAME)
+	$(CC) $(CC_FLAGS) $(FLAGS) $(TEST_NAME)-L./libft -lft -o test_true_malloc
 	\time -l ./test_true_malloc || echo "Failure"
