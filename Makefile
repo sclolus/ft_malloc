@@ -12,7 +12,8 @@ SRC= srcs/malloc.c \
 	srcs/arena_list.c \
 	srcs/malloc_info.c \
 	srcs/arena.c \
-	srcs/malloc_mutex.c
+	srcs/malloc_mutex.c \
+	srcs/find_addr.c
 HDRS= includes/ft_malloc.h
 OBJ= $(SRC:.c=.o)
 CC= gcc

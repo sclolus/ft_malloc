@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:16:10 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 18:56:38 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 20:34:53 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,12 @@
 
 t_arena_list	*init_list(t_arena_list *list, uint64_t allocated_size)
 {
-	ft_bzero(list, allocated_size); // remove this ?
+	ft_bzero(list, allocated_size);
 	list->headers = (t_arena_header*)(list + 1);
-	list->nbr_arenas = 0; //safe to remove for now.
+	list->nbr_arenas = 0;
 	list->next = NULL;
-	list->capacity = (allocated_size - sizeof(t_arena_list)) / sizeof(t_arena_header);
+	list->capacity = (allocated_size - sizeof(t_arena_list))
+										/ sizeof(t_arena_header);
 	return (list);
 }
 
@@ -27,9 +28,10 @@ t_arena_list	*allocate_arena_list(void)
 	t_arena_list	*new;
 	uint64_t		allocated_size;
 
-	assert(g_malloc_info.page_size >= sizeof(t_arena_list)); //man if that happans I dunno what to do (well I do.)
+	assert(g_malloc_info.page_size >= sizeof(t_arena_list));
 	allocated_size = g_malloc_info.page_size * ARENA_LIST_SIZE_MULTIPLE;
-	if (MAP_FAILED == (new = mmap(NULL, allocated_size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0)))
+	if (MAP_FAILED == (new = mmap(NULL, allocated_size, PROT_READ | PROT_WRITE
+									, MAP_ANON | MAP_PRIVATE, -1, 0)))
 		return (NULL);
 	init_list(new, allocated_size);
 	return (new);
@@ -47,10 +49,10 @@ t_arena_list	*add_arena_list(t_arena_list *list)
 
 int				deallocate_arena_list(t_arena_list *list)
 {
-	return (munmap((void*)list, g_malloc_info.page_size * ARENA_LIST_SIZE_MULTIPLE));
+	return (munmap((void*)list
+		, g_malloc_info.page_size * ARENA_LIST_SIZE_MULTIPLE));
 }
 
-/// the first list is never removed. ye.
 t_arena_list	*remove_arena_list(t_arena_list *list)
 {
 	t_arena_list	*next;
@@ -61,7 +63,7 @@ t_arena_list	*remove_arena_list(t_arena_list *list)
 	assert(list->nbr_arenas == 0);
 	next = list->next;
 	prev = list->prev;
-	assert(deallocate_arena_list(list) == 0); // should never ever fail
+	assert(deallocate_arena_list(list) == 0);
 	if (prev)
 		prev->next = next;
 	if (next)
@@ -69,7 +71,6 @@ t_arena_list	*remove_arena_list(t_arena_list *list)
 	return (prev);
 }
 
-/// Find the first arena_header unused in a particular node
 t_arena_header		*find_first_unused_arena_header(t_arena_list *node)
 {
 	uint64_t	i;
@@ -99,51 +100,9 @@ t_arena_list		*find_first_available_arena_list(t_arena_list *list)
 	return (NULL);
 }
 
-
-t_arena_header		*find_addr_in_hdr_list(void *addr, t_arena_list *list)
-{
-	uint64_t	i;
-
-	i = 0;
-	if (list == NULL)
-		return (NULL);
-	while (i < list->capacity)
-	{
-		if (list->headers[i].state == USED &&
-			is_addr_allocated_in_arena(addr, &list->headers[i]))
-			return (&list->headers[i]);
-		i++;
-	}
-	return (NULL);
-}
-
-t_arena_list		*find_addr_in_arena_list(void *addr, t_arena_list *list)
-{
-	assert(list);
-	while (list)
-	{
-		if ((find_addr_in_hdr_list(addr, list)))
-			return (list);
-		list = list->next;
-	}
-	return (NULL);
-}
-///this function retrievies the arena_header from which the addr belongs to.
-t_arena_list		*find_addr_in_arenas(void *addr)
-{
-	t_arena_list *list;
-
-	if ((list = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[TINY_A])))
-		return (list);
-	if ((list = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[SMALL_A])))
-		return (list);
-	if ((list = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[LARGE_A])))
-		return (list);
-	return (NULL);
-}
-
-//`size` is unused if type != LARGE_A
-t_arena_header	*add_new_arena(t_arena_list *list, t_arena_type type, uint64_t size)
+t_arena_header	*add_new_arena(t_arena_list *list,
+								t_arena_type type,
+								uint64_t size)
 {
 	t_arena_list	*corresponding_node;
 	t_arena_header	*hdr;
