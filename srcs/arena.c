@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 19:21:42 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 20:12:44 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,11 +144,10 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 	size = type != LARGE_A ? g_malloc_info.arena_type_infos[type].allocation_size : size;
 	copied_size = old_size > size ? size : old_size;
 	if (!size)
-		copied_size = TINY_ALLOCATION_SIZE; //dunno about that
+		copied_size = TINY_ALLOCATION_SIZE;
 	if (new_addr)
 		ft_memcpy(new_addr, ptr, copied_size);
 	free_memory_zone(ptr, list);
-	// DONT FORGET TO FREE THE OLD PTR
 	return (new_addr);
 }
 

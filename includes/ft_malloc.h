@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 19:06:47 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 20:11:30 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,7 @@ typedef struct	s_malloc_info
 	int					fd_output;
 	t_malloc_flags		flags;
 	uint8_t				initialized;
-	uint8_t				pad[1];
+	uint8_t				main_was_called;
 }				t_malloc_info;
 
 extern t_malloc_info	g_malloc_info;

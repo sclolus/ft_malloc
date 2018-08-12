@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 19:34:48 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 20:12:12 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ t_malloc_info	g_malloc_info = {
 	{NULL}, {{ALLOCATIONS_PER_ARENA, 0, TINY_ALLOCATION_SIZE, malloc_on_arenas, TINY_A, {0}}
 			 , {ALLOCATIONS_PER_ARENA, 0, SMALL_ALLOCATION_SIZE, malloc_on_arenas, SMALL_A, {0}}
 			 , {1, 0, SMALL_ALLOCATION_SIZE + 1, malloc_on_arenas, LARGE_A, {0}}}
-	, DEFAULT_PAGE_SIZE, STDOUT_FILENO, {0, 0, 0, 0}, 0, {0}
+	, DEFAULT_PAGE_SIZE, STDOUT_FILENO, {0, 0, 0, 0}, 0, 0
 };
 
 void free(void *ptr) {
@@ -29,7 +29,7 @@ void free(void *ptr) {
 	malloc_lock_mutex();
 	if ((node = find_addr_in_arenas(ptr)) == NULL)
 	{
-		if (g_main_was_called) {
+		if (g_malloc_info.main_was_called) {
 			PRINT(g_malloc_info.fd_output, "pointer being free'd was not allocated: ");
 			PRINT(g_malloc_info.fd_output, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
 			PRINT(g_malloc_info.fd_output, "\n");
@@ -43,51 +43,16 @@ void free(void *ptr) {
 	malloc_unlock_mutex();
 }
 
-static void	test_basic_arena_list_functions(void)
-{
-	uint32_t		i = 0;
-
-	while (i < 128) {
-		assert(add_arena_list(g_malloc_info.arena_lists[1]));
-		i++;
-	}
-	i = 0;
-	while (i < 128)
-	{
-		assert(remove_arena_list(g_malloc_info.arena_lists[1]->next));
-		i++;
-	}
-	assert(g_malloc_info.arena_lists[1]->next == NULL);
-}
-
-static void	test_malloc(void)
-{
-	if (g_malloc_info.initialized)
-	{
-		PRINT(g_malloc_info.fd_output, "Did not test malloc since it was already used before\n");
-		return ;
-	}
-	if (-1 == init_malloc_info())
-	{
-		PRINT(g_malloc_info.fd_output, "failed to init_malloc_info");
-	}
-	test_basic_arena_list_functions();
-}
-
-typedef void *(*malloc_func_t)(size_t);
-
-uint32_t	g_main_was_called = 0;
-
 __attribute__((constructor(99999))) void main_was_called(void)
 {
-	g_main_was_called = 1;
+	g_malloc_info.main_was_called = 1;
 }
 
 void *malloc(size_t size)
 {
 	t_arena_type	arena_type;
 	void			*ptr;
-	(void)test_malloc;
+
 	if (-1 == init_malloc_info())
 		return (NULL);
 	malloc_lock_mutex();
@@ -112,7 +77,7 @@ void *realloc(void *ptr, size_t size)
 }
 
 
-void *reallocf(void *ptr, size_t size) // not completed
+void *reallocf(void *ptr, size_t size)
 {
 	void			*new_zone;
 	t_arena_type	arena_type;
