@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 07:32:38 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 19:06:47 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ extern void	*calloc(size_t count, size_t size);
 extern void	*valloc(size_t size);
 
 # define ALLOCATIONS_PER_ARENA 128
-# define DEFAULT_PAGE_SIZE 4096
+# define DEFAULT_PAGE_SIZE 1024
 # define TINY_ALLOCATION_SIZE 64
 # define TINY_ARENA_SIZE TINY_ALLOCATION_SIZE * ALLOCATIONS_PER_ARENA
 # define SMALL_ALLOCATION_SIZE DEFAULT_PAGE_SIZE
@@ -141,6 +141,14 @@ typedef struct	s_arena_type_info
 	uint8_t				pad[4];
 }				t_arena_type_info;
 
+typedef struct	s_malloc_flags
+{
+	uint16_t	log_file : 1;
+	uint16_t	scribble : 1;
+	uint16_t	error_abort : 1;
+	uint16_t	pad : 13;
+}				t_malloc_flags;
+
 typedef struct	s_malloc_info
 {
 	t_arena_list		*arena_lists[SUPPORTED_ARENA_TYPES];
@@ -148,8 +156,9 @@ typedef struct	s_malloc_info
 	t_arena_type_info	arena_type_infos[SUPPORTED_ARENA_TYPES];
 	uint64_t			page_size;
 	int					fd_output;
+	t_malloc_flags		flags;
 	uint8_t				initialized;
-	uint8_t				pad[3];
+	uint8_t				pad[1];
 }				t_malloc_info;
 
 extern t_malloc_info	g_malloc_info;
@@ -165,7 +174,6 @@ void		malloc_unlock_mutex(void);
 
 // DEBUG FUNCTIONS
 
-void		print_arena_type(t_arena_type type);
 # define PRINT(fd, x) write(fd, x, strlen(x));
 
 #endif

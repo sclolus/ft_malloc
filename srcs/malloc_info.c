@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:13:35 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 08:48:30 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 19:26:15 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,39 @@ INLINE void		malloc_unlock_mutex(void)
 	assert(pthread_mutex_unlock(&g_malloc_mutex) == 0);
 }
 
+
+INLINE void		set_malloc_flags(void)
+{
+	char				*filename;
+
+	if ((filename = getenv("MallocLogFil"))) {
+		if (-1 == (g_malloc_info.fd_output = open(filename, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR)))
+		{
+			PRINT(STDERR_FILENO, "Failed to open log file: ");
+			PRINT(STDERR_FILENO, filename);
+			PRINT(STDERR_FILENO, "\n");
+			g_malloc_info.fd_output = STDERR_FILENO;
+			return ;
+		}
+		g_malloc_info.flags.log_file = 1;
+	}
+	else
+		g_malloc_info.fd_output = STDERR_FILENO;
+	if (getenv("MallocScribble"))
+	{
+		PRINT(g_malloc_info.fd_output, "malloc: enabling scribbling to detect mods to free blocks\n");
+		g_malloc_info.flags.scribble = 1;
+	}
+	if (getenv("MallocErrorAbort"))
+	{
+		PRINT(g_malloc_info.fd_output, "malloc: enabling abort() on bad malloc or free\n");
+		g_malloc_info.flags.error_abort = 1;
+	}
+}
+
 INLINE int32_t	init_malloc_info(void)
 {
 	pthread_mutexattr_t	attr;
-	char				*filename;
 
 	if (g_malloc_info.initialized)
 		return (0);
@@ -43,9 +72,6 @@ INLINE int32_t	init_malloc_info(void)
 	g_malloc_info.arena_type_infos[TINY_A].nbr_pages = TINY_ARENA_SIZE / g_malloc_info.page_size;
 	g_malloc_info.arena_type_infos[SMALL_A].nbr_pages = SMALL_ARENA_SIZE / g_malloc_info.page_size;
 	g_malloc_info.arena_type_infos[LARGE_A].nbr_pages = (SMALL_ARENA_SIZE + 1) / g_malloc_info.page_size; //this does not matter
-	if ((filename = getenv("MallocLogFil")) == NULL)
-		return (0);
-	if (-1 == (g_malloc_info.fd_output = open(filename, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR)))
-		return (-1);
+	set_malloc_flags();
 	return (0);
 }

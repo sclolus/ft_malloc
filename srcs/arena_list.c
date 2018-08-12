@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:16:10 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 07:16:40 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 18:56:38 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,6 @@ t_arena_list	*init_list(t_arena_list *list, uint64_t allocated_size)
 	list->nbr_arenas = 0; //safe to remove for now.
 	list->next = NULL;
 	list->capacity = (allocated_size - sizeof(t_arena_list)) / sizeof(t_arena_header);
-	/* PRINT(1, "\nlist->capacity: "); */
-	/* PRINT(1, ft_static_ulltoa(list->capacity)); */
-	/* PRINT(1, "\n"); */
 	return (list);
 }
 
@@ -73,7 +70,7 @@ t_arena_list	*remove_arena_list(t_arena_list *list)
 }
 
 /// Find the first arena_header unused in a particular node
-INLINE  t_arena_header	*find_first_unused_arena_header(t_arena_list *node)
+t_arena_header		*find_first_unused_arena_header(t_arena_list *node)
 {
 	uint64_t	i;
 
@@ -108,6 +105,8 @@ t_arena_header		*find_addr_in_hdr_list(void *addr, t_arena_list *list)
 	uint64_t	i;
 
 	i = 0;
+	if (list == NULL)
+		return (NULL);
 	while (i < list->capacity)
 	{
 		if (list->headers[i].state == USED &&
@@ -141,12 +140,6 @@ t_arena_list		*find_addr_in_arenas(void *addr)
 	if ((list = find_addr_in_arena_list(addr, g_malloc_info.arena_lists[LARGE_A])))
 		return (list);
 	return (NULL);
-}
-
-INLINE t_arena_list	*retrieve_arena_list(t_arena_header *hdr)
-{
-//	assert(ARENA_LIST_SIZE_MULTIPLE == 1); // won't work else, I guess
-	return ((t_arena_list*)((uint64_t)hdr - ((uint64_t)hdr % (ARENA_LIST_SIZE_MULTIPLE * g_malloc_info.page_size))));
 }
 
 //`size` is unused if type != LARGE_A

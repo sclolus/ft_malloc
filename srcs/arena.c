@@ -6,32 +6,13 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 16:42:46 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 19:21:42 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-
-void	print_arena_type(t_arena_type type)
-{
-	const static char	*names[SUPPORTED_ARENA_TYPES] = {
-		"tiny", "small", "large",
-	};
-	uint32_t	i = 0;
-
-	while (i < sizeof(names) / sizeof(*names))
-	{
-		if ((int)type == (int)i)
-		{
-			write(1, names[i], strlen(names[i]));
-		}
-		i++;
-	}
-	PRINT(1, "\nNO TYPE FOUND\n");
-}
-
-INLINE t_arena_type	get_arena_type_by_size(size_t size)
+t_arena_type	get_arena_type_by_size(size_t size)
 {
 	uint32_t	i;
 
@@ -48,7 +29,6 @@ INLINE t_arena_type	get_arena_type_by_size(size_t size)
 t_arena			*allocate_arena(uint64_t nbr_pages)
 {
 	t_arena	*new;
-
 	if (MAP_FAILED ==
 		(new = mmap(NULL
 					, nbr_pages * g_malloc_info.page_size
@@ -83,10 +63,8 @@ void		*allocate_memory_on_arena(t_arena_header *hdr, uint64_t size)
 	void	*addr = (uint8_t*)hdr->addr + i * g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	assert((uint64_t)addr % 8 == 0);
 	assert((uint64_t)addr % 64 == 0);
-	/* PRINT(g_malloc_info.fd_output, "\nallocated addr: "); */
-	/* PRINT(g_malloc_info.fd_output, ft_static_ulltoa_base((uint64_t)addr, HEX_BASE)); */
-	/* PRINT(g_malloc_info.fd_output, ", of size: "); */
-	/* PRINT(g_malloc_info.fd_output, ft_static_ulltoa((uint64_t)size)); */
+	if (g_malloc_info.flags.scribble)
+		ft_memset(addr, 0xaa, g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size);
 	return (addr);
 }
 
@@ -151,9 +129,11 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 	hdr = find_addr_in_hdr_list(ptr, list);
 	if (hdr == NULL || list == NULL)
 	{
-		PRINT(2, "pointer being realloc'd was not allocated: ");
-		PRINT(2, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
-		PRINT(2, "\n");
+		PRINT(g_malloc_info.fd_output, "pointer being realloc'd was not allocated: ");
+		PRINT(g_malloc_info.fd_output, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
+		PRINT(g_malloc_info.fd_output, "\n");
+		if (g_malloc_info.flags.error_abort)
+			abort();
 		return (NULL);
 	}
 	if (g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size >= size)
@@ -202,6 +182,9 @@ void	free_memory_zone(void *addr, t_arena_list *node)
 	allocation_size = g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	alloc_index = (uint64_t)((uint8_t*)addr - (uint8_t*)hdr->addr) / allocation_size;
 	hdr->arena_alloc_bitmap[alloc_index / (sizeof(t_alloc_bitmap) * 8UL)] &= ~(0x1UL << (63UL - alloc_index % (sizeof(t_alloc_bitmap) * 8UL)));
+	if (g_malloc_info.flags.scribble)
+		ft_memset((uint8_t*)hdr->addr + alloc_index * g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size
+				  , 0x55, g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size);
 	if (hdr->alloc_number == 0)
 		trash_arena(hdr, node);
 }
