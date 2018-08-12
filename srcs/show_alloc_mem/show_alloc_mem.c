@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/12 22:07:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 01:19:03 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:42:11 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,8 @@ static void				show_alloc_arenas(t_arena_list *arena_list)
 		return ;
 	if (NULL == (hdrs = allocate_hdr_array(nbr_arena_hdrs)))
 	{
-		PRINT(g_malloc_info.fd_output, ft_static_ulltoa(nbr_arena_hdrs));
-		PRINT(g_malloc_info.fd_output,
-			"Failed to show_alloc_mem(): out of memory");
+		malloc_print(ft_static_ulltoa(nbr_arena_hdrs));
+		malloc_print("Failed to show_alloc_mem(): out of memory");
 		return ;
 	}
 	fill_hdr_array(hdrs, arena_list);

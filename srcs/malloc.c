@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 22:44:12 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:41:00 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,11 @@ void	free(void *ptr)
 	{
 		if (g_malloc_info.main_was_called)
 		{
-			PRINT(g_malloc_info.fd_output
-				, "pointer being free'd was not allocated: ");
-			PRINT(g_malloc_info.fd_output
-				, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
-			PRINT(g_malloc_info.fd_output, "\n");
+			malloc_print(
+				"pointer being free'd was not allocated: ");
+			malloc_print(
+				ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
+			malloc_print("\n");
 			if (g_malloc_info.flags.error_abort)
 				abort();
 		}

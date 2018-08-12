@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 01:33:54 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:39:40 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,6 @@ void			malloc_unlock_mutex(void);
 void			print_mem_arenas(t_arena_header **hdrs,
 							uint64_t nbr_hdrs);
 uint64_t		get_nbr_arena_headers(t_arena_list *list);
-
-# define PRINT(fd, x) write(fd, x, strlen(x));
+void			malloc_print(const char *str);
 
 #endif

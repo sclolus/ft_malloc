@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/13 00:39:51 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 00:43:48 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:44:11 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,9 @@
 
 static void	*realloc_error_not_allocated(void *ptr)
 {
-	PRINT(g_malloc_info.fd_output
-		, "pointer being realloc'd was not allocated: ");
-	PRINT(g_malloc_info.fd_output
-		, ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
-	PRINT(g_malloc_info.fd_output, "\n");
+	malloc_print("pointer being realloc'd was not allocated: ");
+	malloc_print(ft_static_ulltoa_base((uint64_t)ptr, HEX_BASE));
+	malloc_print("\n");
 	if (g_malloc_info.flags.error_abort)
 		abort();
 	return (NULL);

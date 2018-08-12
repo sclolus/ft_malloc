@@ -21,12 +21,13 @@ SRC= srcs/malloc.c \
 	srcs/show_alloc_mem/get_arena_number.c \
 	srcs/free_memory_zone.c \
 	srcs/realloc_on_arenas.c \
-	srcs/malloc_on_arenas.c
+	srcs/malloc_on_arenas.c \
+	srcs/print.c
 
 HDRS= includes/ft_malloc.h
 OBJ= $(SRC:.c=.o)
 CC= gcc
-CC_FLAGS= -v -Wall -Werror -Wextra -g3 #-fsanitize=address -fsanitize-blacklist=my_ignores.txt
+CC_FLAGS= -v -Wall -Werror -Wextra -Weverything -g3 #-fsanitize=address -fsanitize-blacklist=my_ignores.txt
 TARGET_CC_FLAGS= -dynamiclib -shared  -fPIC
 LIBFT_PATH=./libft/
 FLAGS= -I./libft/includes -I./includes

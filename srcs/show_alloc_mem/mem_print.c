@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/13 00:17:47 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 00:22:38 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:43:39 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,9 @@ static const char		*get_arena_type_name(t_arena_type type)
 
 static void				print_addr(void *addr)
 {
-	PRINT(g_malloc_info.fd_output, "0x");
-	PRINT(g_malloc_info.fd_output, ft_static_ulltoa_base((uint64_t)addr
-														, HEX_BASE));
+	malloc_print("0x");
+	malloc_print(ft_static_ulltoa_base((uint64_t)addr
+											, HEX_BASE));
 }
 
 static void				print_allocation(uint64_t index, t_arena_header *hdr)
@@ -48,21 +48,21 @@ static void				print_allocation(uint64_t index, t_arena_header *hdr)
 					(uint64_t)hdr->alloc_headers[index].size);
 	allocation_addr = (uint8_t*)hdr->addr + (index * allocation_size);
 	print_addr(allocation_addr);
-	PRINT(g_malloc_info.fd_output, " - ");
+	malloc_print(" - ");
 	print_addr(allocation_addr + allocation_size);
-	PRINT(g_malloc_info.fd_output, " : ");
-	PRINT(g_malloc_info.fd_output, ft_static_ulltoa(allocation_size));
-	PRINT(g_malloc_info.fd_output, " bytes\n");
+	malloc_print(" : ");
+	malloc_print(ft_static_ulltoa(allocation_size));
+	malloc_print(" bytes\n");
 }
 
 static void				print_arena_allocations(t_arena_header *hdr)
 {
 	uint64_t	i;
 
-	PRINT(g_malloc_info.fd_output, get_arena_type_name(hdr->arena_type));
-	PRINT(g_malloc_info.fd_output, " : ");
+	malloc_print(get_arena_type_name(hdr->arena_type));
+	malloc_print(" : ");
 	print_addr(hdr->addr);
-	PRINT(g_malloc_info.fd_output, "\n");
+	malloc_print("\n");
 	i = 0;
 	while (i
 		< g_malloc_info.arena_type_infos[hdr->arena_type].allocation_per_arena)
