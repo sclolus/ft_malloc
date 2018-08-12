@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 01:25:03 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:33:54 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ extern void		show_alloc_mem(void);
 # define SMALL_ARENA_SIZE SMALL_ALLOCATION_SIZE * ALLOCATIONS_PER_ARENA
 
 # define HEX_BASE "0123456789abcdef"
+# define CONSTRUCTOR __attribute__((constructor(99999))) void
 
 typedef enum	e_arena_type
 {

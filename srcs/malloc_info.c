@@ -6,13 +6,13 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:13:35 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:23:59 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:34:13 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-void		main_was_called(void) __attribute__((constructor(99999)))
+CONSTRUCTOR	main_was_called(void)
 {
 	g_malloc_info.main_was_called = 1;
 }

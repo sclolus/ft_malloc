@@ -26,7 +26,7 @@ SRC= srcs/malloc.c \
 HDRS= includes/ft_malloc.h
 OBJ= $(SRC:.c=.o)
 CC= gcc
-CC_FLAGS= -v -Wall  -Wextra -Weverything  -O0 -g3 #-fsanitize=address -fsanitize-blacklist=my_ignores.txt
+CC_FLAGS= -v -Wall -Werror -Wextra -g3 #-fsanitize=address -fsanitize-blacklist=my_ignores.txt
 TARGET_CC_FLAGS= -dynamiclib -shared  -fPIC
 LIBFT_PATH=./libft/
 FLAGS= -I./libft/includes -I./includes
