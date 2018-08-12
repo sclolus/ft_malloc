@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 07:51:59 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 16:42:46 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,10 @@ void	*malloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type) // 
 	if (!(hdr = find_first_available_arena(list)))
 		if (!(hdr = add_new_arena(list, type, size)))
 			return (NULL);
-	return (allocate_memory_on_arena(hdr, size));
+
+	void	*ptr =  allocate_memory_on_arena(hdr, size);
+	assert((uint64_t)ptr % 16 == 0);
+	return (ptr);
 }
 
 void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, void *ptr)
@@ -140,6 +143,7 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 	t_arena_header	*hdr;
 	void			*new_addr;
 	uint64_t		copied_size;
+	uint64_t		old_size;
 
 	if (ptr == NULL)
 		return (malloc_on_arenas(size, g_malloc_info.arena_lists[type], type));
@@ -155,7 +159,12 @@ void	*realloc_on_arenas(uint64_t size, t_arena_list *list, t_arena_type type, vo
 	if (g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size >= size)
 		return (ptr);
 	new_addr = malloc_on_arenas(size, g_malloc_info.arena_lists[type], type);
-	copied_size = size < g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size ? size : g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
+	old_size = hdr->arena_type != LARGE_A ? g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size
+		: hdr->nbr_pages * g_malloc_info.page_size;
+	size = type != LARGE_A ? g_malloc_info.arena_type_infos[type].allocation_size : size;
+	copied_size = old_size > size ? size : old_size;
+	if (!size)
+		copied_size = TINY_ALLOCATION_SIZE; //dunno about that
 	if (new_addr)
 		ft_memcpy(new_addr, ptr, copied_size);
 	free_memory_zone(ptr, list);
@@ -183,10 +192,12 @@ void	free_memory_zone(void *addr, t_arena_list *node)
 	uint64_t		alloc_index;
 	t_arena_header	*hdr;
 
-	if (addr == NULL)
+	if (addr == NULL || node == NULL)
 		return ;
 	hdr = find_addr_in_hdr_list(addr, node);
 	assert(hdr);
+	if (hdr == NULL)
+		return ;
 	hdr->alloc_number--;
 	allocation_size = g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	alloc_index = (uint64_t)((uint8_t*)addr - (uint8_t*)hdr->addr) / allocation_size;

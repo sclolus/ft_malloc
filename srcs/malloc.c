@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/10 08:21:23 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 17:19:51 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,10 @@ void free(void *ptr) {
 	PRINT(g_malloc_info.fd_output, "\n");
 
 	if (-1 == init_malloc_info() || ptr == NULL)
+	{
+		PRINT(g_malloc_info.fd_output, "\free was exited: ");
 		return ;
+	}
 	malloc_lock_mutex();
 	if ((node = find_addr_in_arenas(ptr)) == NULL)
 	{
@@ -39,10 +42,12 @@ void free(void *ptr) {
 			PRINT(2, "\n");
 		}
 		malloc_unlock_mutex();
+		PRINT(g_malloc_info.fd_output, "\free was exited: ");
 		return ;
 	}
 	free_memory_zone(ptr, node);
 	malloc_unlock_mutex();
+	PRINT(g_malloc_info.fd_output, "\free was exited: ");
 }
 
 static void	test_basic_arena_list_functions(void)
@@ -71,7 +76,7 @@ static void	test_malloc(void)
 	}
 	if (-1 == init_malloc_info())
 	{
-		PRINT(1, "failed to init_malloc_info");
+		PRINT(g_malloc_info.fd_output, "failed to init_malloc_info");
 	}
 	test_basic_arena_list_functions();
 }
@@ -91,7 +96,7 @@ void *malloc(size_t size)
 	void			*ptr;
 	(void)size;
 	(void)test_malloc;
-	PRINT(1, "malloc() was called\n");
+	PRINT(g_malloc_info.fd_output, "malloc() was called\n");
 	if (-1 == init_malloc_info())
 		return (NULL);
 	(void)arena_type;
@@ -99,9 +104,9 @@ void *malloc(size_t size)
 	arena_type = get_arena_type_by_size(size);
 	ptr = malloc_on_arenas(size, g_malloc_info.arena_lists[arena_type], arena_type);
 	malloc_unlock_mutex();
-	PRINT(1, "size : ");
-	PRINT(1, ft_static_ulltoa(size));
-	PRINT(1, "malloc() was exited\n");
+	PRINT(g_malloc_info.fd_output, "size : ");
+	PRINT(g_malloc_info.fd_output, ft_static_ulltoa(size));
+	PRINT(g_malloc_info.fd_output, "malloc() was exited\n");
 	return (ptr); // add errno
 }
 
@@ -110,7 +115,7 @@ void *realloc(void *ptr, size_t size)
 	void			*new_zone;
 	t_arena_type	arena_type;
 
-	PRINT(1, "realloc() was called\n");
+	PRINT(g_malloc_info.fd_output, "realloc() was called\n");
 	if (-1 == init_malloc_info())
 		return (NULL);
 	malloc_lock_mutex();
@@ -126,7 +131,7 @@ void *reallocf(void *ptr, size_t size) // not completed
 	void			*new_zone;
 	t_arena_type	arena_type;
 
-	PRINT(1, "reallocf() was called\n");
+	PRINT(g_malloc_info.fd_output, "reallocf() was called\n");
 	if (-1 == init_malloc_info())
 		return (NULL);
 	malloc_lock_mutex();
@@ -143,7 +148,7 @@ void	*calloc(size_t count, size_t size)
 
 	if (-1 == init_malloc_info())
 		return (NULL);
-	PRINT(1, "calloc() was called\n");
+	PRINT(g_malloc_info.fd_output, "calloc() was called\n");
 	malloc_lock_mutex();
 	ptr = malloc(count * size);
 	ft_bzero(ptr, count * size);
@@ -154,7 +159,7 @@ void	*calloc(size_t count, size_t size)
 void	*valloc(size_t size)
 {
 	(void)size;
-	PRINT(1, "valloc() was called ");
+	PRINT(g_malloc_info.fd_output, "valloc() was called ");
 	assert(0);
 	if (size)
 		exit(EXIT_FAILURE);
