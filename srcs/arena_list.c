@@ -6,38 +6,13 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:16:10 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:34:53 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 20:39:18 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-t_arena_list	*init_list(t_arena_list *list, uint64_t allocated_size)
-{
-	ft_bzero(list, allocated_size);
-	list->headers = (t_arena_header*)(list + 1);
-	list->nbr_arenas = 0;
-	list->next = NULL;
-	list->capacity = (allocated_size - sizeof(t_arena_list))
-										/ sizeof(t_arena_header);
-	return (list);
-}
-
-t_arena_list	*allocate_arena_list(void)
-{
-	t_arena_list	*new;
-	uint64_t		allocated_size;
-
-	assert(g_malloc_info.page_size >= sizeof(t_arena_list));
-	allocated_size = g_malloc_info.page_size * ARENA_LIST_SIZE_MULTIPLE;
-	if (MAP_FAILED == (new = mmap(NULL, allocated_size, PROT_READ | PROT_WRITE
-									, MAP_ANON | MAP_PRIVATE, -1, 0)))
-		return (NULL);
-	init_list(new, allocated_size);
-	return (new);
-}
-
-t_arena_list	*add_arena_list(t_arena_list *list)
+t_arena_list		*add_arena_list(t_arena_list *list)
 {
 	while (list->next)
 		list = list->next;
@@ -47,13 +22,7 @@ t_arena_list	*add_arena_list(t_arena_list *list)
 	return (list->next);
 }
 
-int				deallocate_arena_list(t_arena_list *list)
-{
-	return (munmap((void*)list
-		, g_malloc_info.page_size * ARENA_LIST_SIZE_MULTIPLE));
-}
-
-t_arena_list	*remove_arena_list(t_arena_list *list)
+t_arena_list		*remove_arena_list(t_arena_list *list)
 {
 	t_arena_list	*next;
 	t_arena_list	*prev;
@@ -100,7 +69,7 @@ t_arena_list		*find_first_available_arena_list(t_arena_list *list)
 	return (NULL);
 }
 
-t_arena_header	*add_new_arena(t_arena_list *list,
+t_arena_header		*add_new_arena(t_arena_list *list,
 								t_arena_type type,
 								uint64_t size)
 {
@@ -112,7 +81,7 @@ t_arena_header	*add_new_arena(t_arena_list *list,
 	if (!(corresponding_node = find_first_available_arena_list(list)))
 		if (!(corresponding_node = add_arena_list(list)))
 			return (NULL);
-	assert(hdr = find_first_unused_arena_header(corresponding_node));
+	hdr = find_first_unused_arena_header(corresponding_node);
 	corresponding_node->last_trashed_arena_header = NULL;
 	nbr_allocated_pages = (type != LARGE_A)
 		? g_malloc_info.arena_type_infos[type].nbr_pages
@@ -128,6 +97,5 @@ t_arena_header	*add_new_arena(t_arena_list *list,
 	hdr->arena_alloc_bitmap[0] = 0UL;
 	hdr->arena_alloc_bitmap[1] = 0UL;
 	hdr->arena_type = type;
-	assert(corresponding_node->nbr_arenas <= corresponding_node->capacity);
 	return (hdr);
 }
