@@ -18,7 +18,10 @@ SRC= srcs/malloc.c \
 	srcs/deallocate_arena_list.c \
 	srcs/show_alloc_mem/show_alloc_mem.c \
 	srcs/show_alloc_mem/mem_print.c \
-	srcs/show_alloc_mem/get_arena_number.c
+	srcs/show_alloc_mem/get_arena_number.c \
+	srcs/free_memory_zone.c \
+	srcs/realloc_on_arenas.c \
+	srcs/malloc_on_arenas.c
 
 HDRS= includes/ft_malloc.h
 OBJ= $(SRC:.c=.o)
