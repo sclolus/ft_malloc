@@ -11,11 +11,12 @@ NAME= $(TARGET)
 SRC= srcs/malloc.c \
 	srcs/arena_list.c \
 	srcs/malloc_info.c \
-	srcs/arena.c
+	srcs/arena.c \
+	srcs/malloc_mutex.c
 HDRS= includes/ft_malloc.h
 OBJ= $(SRC:.c=.o)
 CC= gcc
-CC_FLAGS= -v -Wall -Werror -Wextra -Weverything  -O0 -g3 #-fsanitize=address -fsanitize-blacklist=my_ignores.txt
+CC_FLAGS= -v -Wall  -Wextra -Weverything  -O0 -g3 #-fsanitize=address -fsanitize-blacklist=my_ignores.txt
 TARGET_CC_FLAGS= -dynamic -shared  -fpic
 LIBFT_PATH=./libft/
 FLAGS= -I./libft/includes -I./includes

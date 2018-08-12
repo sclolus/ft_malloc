@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:11:30 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 20:25:21 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,15 +128,11 @@ t_arena_list	*find_addr_in_arenas(void *addr);
 t_arena_list	*find_addr_in_arena_list(void *addr, t_arena_list *list);
 t_arena_header	*find_addr_in_hdr_list(void *addr, t_arena_list *list);
 
-
-
-typedef void	*(*t_memory_allocator)(uint64_t, t_arena_list *, t_arena_type);
 typedef struct	s_arena_type_info
 {
 	uint64_t			allocation_per_arena;
 	uint64_t			nbr_pages;
 	uint64_t			allocation_size;
-	t_memory_allocator	memory_allocator;
 	t_arena_type		type;
 	uint8_t				pad[4];
 }				t_arena_type_info;

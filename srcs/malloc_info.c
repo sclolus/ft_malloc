@@ -6,22 +6,15 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:13:35 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:21:15 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 20:23:59 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-pthread_mutex_t	g_malloc_mutex;
-
-void		malloc_lock_mutex(void)
+void		main_was_called(void) __attribute__((constructor(99999)))
 {
-	assert(pthread_mutex_lock(&g_malloc_mutex) == 0);
-}
-
-void		malloc_unlock_mutex(void)
-{
-	assert(pthread_mutex_unlock(&g_malloc_mutex) == 0);
+	g_malloc_info.main_was_called = 1;
 }
 
 static void	open_log_file(void)
