@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:57 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:14:51 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 00:12:41 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,26 +18,41 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 void print(char *s);
 void print(char *s)
 {
 	write(1, s, strlen(s));
 }
+# define TINY_ALLOC 64
+# define SMALL_ALLOC 663
+# define LARGE_ALLOC 444
 
 int main()
 {
 	char *addr;
+	uint64_t	 i;
 
-	if ((addr = malloc(~0UL)) != NULL)
-		exit(EXIT_FAILURE);
-	addr = malloc(16);
-	free(NULL);
-	free((char *)addr + 5);
-	if (realloc((char *)addr + 5, 10) == NULL)
-		print("Bonjours\n");
-	void * ptr = malloc(1234);
-	assert(*(uint8_t*)ptr == 0xaa);
-//	free(ptr);
-	free(ptr);
+	i = 0;
+	while (i < TINY_ALLOC)
+		malloc(i++ % 64);
+	i = 0;
+	while (i < SMALL_ALLOC)
+		malloc(i++ % 1024);
+	i = 0;
+	while (i < LARGE_ALLOC)
+		malloc(i++ + 1042);
+
+	show_alloc_mem();
+/* 	i = 0; */
+/* 	while (i < 1024) */
+/* 	{ */
+/* 		addr = malloc(1024); */
+/* 		(void)addr; */
+/* 		*addr = 0x2A; */
+/* //		memset(addr, 42, 1024); */
+/* 		i++; */
+/* 	} */
+/* 	show_alloc_mem(); */
 	return (0);
 }

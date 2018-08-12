@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 16:17:46 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:12:44 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 00:09:11 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,19 +47,18 @@ void		*allocate_memory_on_arena(t_arena_header *hdr, uint64_t size)
 	uint64_t	i;
 
 	i = 0;
-	while (i < g_malloc_info.arena_type_infos[hdr->arena_type].allocation_per_arena) // g_malloc_info.arena_type_infos[type].allocation_per_arena ?
+	while (i < g_malloc_info.arena_type_infos[hdr->arena_type].allocation_per_arena)
 	{
 		if (!((hdr->arena_alloc_bitmap[i / (sizeof(t_alloc_bitmap) * 8UL)]) & (0x1UL << (63UL - i % (sizeof(t_alloc_bitmap) * 8UL)))))
 			break;
 		i++;
 	}
 	assert(i < g_malloc_info.arena_type_infos[hdr->arena_type].allocation_per_arena);
-//	hdr->alloc_headers[i].size = (uint16_t)size;
-//	hdr->alloc_headers[i].md5_sum = 0x0;
-	(void)size;
 	hdr->arena_alloc_bitmap[i / (sizeof(t_alloc_bitmap) * 8UL)] |= 0x1UL << (63UL - i % (sizeof(t_alloc_bitmap) * 8UL));
 	hdr->alloc_number++;
-
+	hdr->alloc_headers[i].size = (uint16_t)size;
+	if (size > SMALL_ALLOCATION_SIZE)
+		*(uint64_t*)hdr->alloc_headers = size;
 	void	*addr = (uint8_t*)hdr->addr + i * g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size;
 	assert((uint64_t)addr % 8 == 0);
 	assert((uint64_t)addr % 64 == 0);

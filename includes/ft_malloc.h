@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:25:21 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 00:21:05 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ extern void *realloc(void *ptr, size_t size);
 extern void *reallocf(void *ptr, size_t size);
 extern void	*calloc(size_t count, size_t size);
 extern void	*valloc(size_t size);
+extern void	show_alloc_mem(void);
 
 # define ALLOCATIONS_PER_ARENA 128
 # define DEFAULT_PAGE_SIZE 1024
@@ -81,8 +82,7 @@ typedef struct	s_arena_header // too large, please fix this
 	/// the number of pages in the arena
 	/// there should be exactly o;ne alloc_bitmap per page allocated
 	t_alloc_bitmap			arena_alloc_bitmap[2];
-
-//	t_alloc_header			alloc_headers[128];
+	t_alloc_header			alloc_headers[ALLOCATIONS_PER_ARENA];
 	uint32_t				alloc_number;
 	uint8_t					pad[4];
 }				t_arena_header;
@@ -163,10 +163,14 @@ extern pthread_mutex_t	g_malloc_mutex;
 
 __attribute__((constructor(99999))) void main_was_called(void);
 
-int32_t	init_malloc_info(void);
+int32_t		init_malloc_info(void);
 
 void		malloc_lock_mutex(void);
 void		malloc_unlock_mutex(void);
+void		print_mem_arenas(t_arena_header **hdrs,
+							uint64_t nbr_hdrs);
+uint64_t	get_nbr_arena_headers(t_arena_list *list);
+
 
 // DEBUG FUNCTIONS
 

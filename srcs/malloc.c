@@ -6,13 +6,12 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:29:05 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/12 22:44:12 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 #include <fcntl.h>
-#include <dlfcn.h>
 
 t_malloc_info	g_malloc_info = {
 	{NULL}, {{ALLOCATIONS_PER_ARENA, 0, TINY_ALLOCATION_SIZE, TINY_A, {0}}, {
