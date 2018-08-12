@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/12 20:34:43 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:34:54 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:18:10 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ t_arena_header		*find_addr_in_hdr_list(void *addr, t_arena_list *list)
 
 t_arena_list		*find_addr_in_arena_list(void *addr, t_arena_list *list)
 {
-	assert(list);
 	while (list)
 	{
 		if ((find_addr_in_hdr_list(addr, list)))

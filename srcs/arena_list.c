@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:16:10 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:39:18 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:18:02 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,8 @@ t_arena_list		*remove_arena_list(t_arena_list *list)
 
 	if (list->prev == NULL)
 		return (list);
-	assert(list->nbr_arenas == 0);
 	next = list->next;
 	prev = list->prev;
-	assert(deallocate_arena_list(list) == 0);
 	if (prev)
 		prev->next = next;
 	if (next)
@@ -44,7 +42,6 @@ t_arena_header		*find_first_unused_arena_header(t_arena_list *node)
 {
 	uint64_t	i;
 
-	assert(node);
 	i = 0;
 	if (node->last_trashed_arena_header)
 		return (node->last_trashed_arena_header);
@@ -59,7 +56,6 @@ t_arena_header		*find_first_unused_arena_header(t_arena_list *node)
 
 t_arena_list		*find_first_available_arena_list(t_arena_list *list)
 {
-	assert(list);
 	while (list)
 	{
 		if (list->nbr_arenas < list->capacity)

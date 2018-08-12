@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/12 20:36:29 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/12 20:36:47 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:18:18 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ t_arena_list	*allocate_arena_list(void)
 	t_arena_list	*new;
 	uint64_t		allocated_size;
 
-	assert(g_malloc_info.page_size >= sizeof(t_arena_list));
 	allocated_size = g_malloc_info.page_size * ARENA_LIST_SIZE_MULTIPLE;
 	if (MAP_FAILED == (new = mmap(NULL, allocated_size, PROT_READ | PROT_WRITE
 									, MAP_ANON | MAP_PRIVATE, -1, 0)))

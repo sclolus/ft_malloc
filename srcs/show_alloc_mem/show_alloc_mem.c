@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/12 22:07:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 00:22:07 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 01:19:03 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ static t_arena_header	**allocate_hdr_array(uint64_t nbr_elems)
 }
 
 static t_arena_header	**fill_hdr_array(t_arena_header **hdrs,
-										uint64_t nbr_elems,
 										t_arena_list *list)
 {
 	uint64_t	i;
@@ -37,7 +36,6 @@ static t_arena_header	**fill_hdr_array(t_arena_header **hdrs,
 		{
 			if (list->headers[i].state == USED)
 			{
-				assert(elem_count < nbr_elems);
 				hdrs[elem_count] = &list->headers[i];
 				elem_count++;
 			}
@@ -45,7 +43,6 @@ static t_arena_header	**fill_hdr_array(t_arena_header **hdrs,
 		}
 		list = list->next;
 	}
-	assert(elem_count == nbr_elems);
 	return (hdrs);
 }
 
@@ -78,7 +75,7 @@ static void				show_alloc_arenas(t_arena_list *arena_list)
 			"Failed to show_alloc_mem(): out of memory");
 		return ;
 	}
-	fill_hdr_array(hdrs, nbr_arena_hdrs, arena_list);
+	fill_hdr_array(hdrs, arena_list);
 	ft_sort(hdrs, nbr_arena_hdrs, sizeof(t_arena_header*), &compar_arenas);
 	print_mem_arenas(hdrs, nbr_arena_hdrs);
 	munmap(hdrs, sizeof(t_arena_header *) * nbr_arena_hdrs);
