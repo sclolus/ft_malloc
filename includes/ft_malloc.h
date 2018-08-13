@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:30 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 01:39:40 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 02:09:27 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,8 @@ typedef struct	s_malloc_flags
 	uint16_t	log_file : 1;
 	uint16_t	scribble : 1;
 	uint16_t	error_abort : 1;
-	uint16_t	pad : 13;
+	uint16_t	quiet : 1;
+	uint16_t	pad : 12;
 }				t_malloc_flags;
 
 typedef struct	s_malloc_info

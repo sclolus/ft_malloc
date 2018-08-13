@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 14:44:33 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 01:41:00 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 02:11:02 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ t_malloc_info	g_malloc_info = {
 	{NULL}, {{ALLOCATIONS_PER_ARENA, 0, TINY_ALLOCATION_SIZE, TINY_A, {0}}, {
 			ALLOCATIONS_PER_ARENA, 0, SMALL_ALLOCATION_SIZE, SMALL_A, {0}}, {
 			1, 0, SMALL_ALLOCATION_SIZE + 1, LARGE_A, {0}}}
-	, DEFAULT_PAGE_SIZE, STDOUT_FILENO, {0, 0, 0, 0}, 0, 0
+	, DEFAULT_PAGE_SIZE, STDOUT_FILENO, {0, 0, 0, 0, 0}, 0, 0
 };
 
 void	free(void *ptr)
@@ -29,7 +29,7 @@ void	free(void *ptr)
 	malloc_lock_mutex();
 	if ((node = find_addr_in_arenas(ptr)) == NULL)
 	{
-		if (g_malloc_info.main_was_called)
+		if (g_malloc_info.main_was_called && !g_malloc_info.flags.quiet)
 		{
 			malloc_print(
 				"pointer being free'd was not allocated: ");

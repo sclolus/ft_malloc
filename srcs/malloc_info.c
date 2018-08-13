@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/06 15:13:35 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 01:41:42 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 02:12:34 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,12 @@ static void	open_log_file(void)
 												| O_WRONLY, S_IRUSR | S_IWUSR)))
 		{
 			g_malloc_info.fd_output = STDERR_FILENO;
-			malloc_print("Failed to open log file: ");
-			malloc_print(filename);
-			malloc_print("\n");
+			if (!g_malloc_info.flags.quiet)
+			{
+				malloc_print("Failed to open log file: ");
+				malloc_print(filename);
+				malloc_print("\n");
+			}
 		}
 		g_malloc_info.flags.log_file = 1;
 	}
@@ -39,17 +42,21 @@ static void	open_log_file(void)
 
 static void	set_malloc_flags(void)
 {
+	if (getenv("MallocQuiet"))
+		g_malloc_info.flags.quiet = 1;
 	open_log_file();
 	if (getenv("MallocScribble"))
 	{
-		malloc_print(
-			"malloc: enabling scribbling to detect mods to free blocks\n");
+		if (!g_malloc_info.flags.quiet)
+			malloc_print(
+				"malloc: enabling scribbling to detect mods to free blocks\n");
 		g_malloc_info.flags.scribble = 1;
 	}
 	if (getenv("MallocErrorAbort"))
 	{
-		malloc_print(
-			"malloc: enabling abort() on bad malloc or free\n");
+		if (!g_malloc_info.flags.quiet)
+			malloc_print(
+				"malloc: enabling abort() on bad malloc or free\n");
 		g_malloc_info.flags.error_abort = 1;
 	}
 }
