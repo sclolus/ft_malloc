@@ -52,13 +52,3 @@ fclean: clean
 	make -C $(LIBFT_PATH) fclean
 
 re: fclean all
-
-$(TEST_NAME): all
-	$(CC)  $(FLAGS) $(TEST_SRCS) $(TARGET) -L./libft -lft $* -o  $(TEST_NAME)
-	DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES=$(TARGET) ./$(TEST_NAME) || echo "Failure"
-$(TEST_NAME)_time: all
-	$(CC) $(FLAGS) $(TEST_SRCS) $(TARGET) -L./libft -lft $* -o  $(TEST_NAME)
-	DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_INSERT_LIBRARIES=$(TARGET) \time -l ./$(TEST_NAME) || echo "Failure"
-true_malloc:
-	$(CC) $(FLAGS) $(TEST_SRCS) -L./libft -lft -o test_true_malloc
-	\time -l ./test_true_malloc || echo "Failure"
