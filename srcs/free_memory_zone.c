@@ -6,7 +6,7 @@
 /*   By: sclolus <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/13 00:39:07 by sclolus           #+#    #+#             */
-/*   Updated: 2018/08/13 00:39:20 by sclolus          ###   ########.fr       */
+/*   Updated: 2018/08/13 03:19:28 by sclolus          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,9 @@ void			free_memory_zone(void *addr, t_arena_list *node)
 	if (g_malloc_info.flags.scribble)
 		ft_memset((uint8_t*)hdr->addr + alloc_index
 	* g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size
-	, 0x55, g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size);
+	, 0x55, hdr->arena_type != LARGE_A ?
+	g_malloc_info.arena_type_infos[hdr->arena_type].allocation_size :
+	*(uint64_t*)hdr->alloc_headers);
 	if (hdr->alloc_number == 0)
 		trash_arena(hdr, node);
 }
